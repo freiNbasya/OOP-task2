@@ -178,6 +178,46 @@ public:
     }
 };
 
+class Inventory {
+private:
+    std::vector<Product*>& products;
+    int lowStockThreshold;
+
+public:
+    Inventory(std::vector<Product*>& products, int lowStockThreshold)
+        : products(products), lowStockThreshold(lowStockThreshold) {}
+    void manageStock(int productID, int quantity) {
+        for (auto& product : products) {
+            if (product->getProductID() == productID) {
+                int currentQuantity = product->getQuantityInStock();
+                if (currentQuantity + quantity >= 0) {
+                    product->setQuantityInStock(currentQuantity + quantity);
+                }
+                break;
+            }
+        }
+    }
+
+
+    void notifyLowStock() const {
+        for (const auto& product : products) {
+            if (product->getQuantityInStock() < lowStockThreshold) {
+                std::cout << "Low stock for product: " << product->getName() << std::endl;
+            }
+        }
+    }
+
+    std::vector<Product*> generateRestockingList() const {
+        std::vector<Product*> restockingList;
+        for (const auto& product : products) {
+            if (product->getQuantityInStock() < lowStockThreshold) {
+                restockingList.push_back(product);
+            }
+        }
+        return restockingList;
+    }
+};
+
 class ConfigReader {
 public:
 
