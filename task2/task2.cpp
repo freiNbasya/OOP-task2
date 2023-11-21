@@ -127,6 +127,72 @@ private:
     std::string material;
 };
 
+class ConfigReader {
+public:
+
+    static void readConfig(const std::string& filename, std::vector<Product*>& products) {
+        std::ifstream configFile(filename);
+
+        if (!configFile.is_open()) {
+            std::cerr << "Error: Unable to open config file." << std::endl;
+            return;
+        }
+
+        std::string line;
+        while (std::getline(configFile, line)) {
+            if (line.empty() || line[0] == '#') {
+
+                continue;
+            }
+
+            std::vector<std::string> tokens = split(line, ',');
+
+
+
+            std::string productType = tokens[0];
+            std::string productName = tokens[1];
+            double price = std::stod(tokens[2]);
+            int quantity = std::stoi(tokens[3]);
+
+            if (productType == "Electronics") {
+                std::string brand = tokens[4];
+                std::string model = tokens[5];
+                double powerConsumption = std::stod(tokens[6]);
+                products.push_back(new Electronics(0, productName, price, quantity, brand, model, powerConsumption));
+            }
+            else if (productType == "Books") {
+                std::string author = tokens[4];
+                std::string genre = tokens[5];
+                std::string ISBN = tokens[6];
+                products.push_back(new Books(0, productName, price, quantity, author, genre, ISBN));
+            }
+            else if (productType == "Clothing") {
+                std::string size = tokens[4];
+                std::string color = tokens[5];
+                std::string material = tokens[6];
+                products.push_back(new Clothing(0, productName, price, quantity, size, color, material));
+            }
+            else {
+                std::cerr << "Error: Unknown product type or invalid format." << std::endl;
+            }
+        }
+
+        configFile.close();
+    }
+
+private:
+
+    static std::vector<std::string> split(const std::string& s, char delimiter) {
+        std::vector<std::string> tokens;
+        std::istringstream tokenStream(s);
+        std::string token;
+        while (std::getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+};
+
 
 int main() {
 
