@@ -371,8 +371,138 @@ private:
     }
 };
 
-
 int main() {
+    std::vector<Product*> products;
+    ConfigReader::readConfig("C:/Labs_Kse/OOP/task2/config.txt", products);
+
+    ProductCatalog catalog(products);
+    Inventory inventory(products, 10);
+    Order currentOrder(products);
+
+    int choice;
+
+    do {
+        std::cout << "\nProduct Management System \n";
+        std::cout << "1. View Products\n";
+        std::cout << "2. Add Product to Order\n";
+        std::cout << "3. View Order\n";
+        std::cout << "4. Checkout\n";
+        std::cout << "5. View Product Catalog\n";
+        std::cout << "6. Update Product Details\n";
+        std::cout << "7. Remove Product from Catalog\n";
+        std::cout << "8. Restock Product\n";
+        std::cout << "9. Generate Restocking List\n";
+        std::cout << "0. Exit\n";
+        std::cout << "Enter your choice: ";
+        std::cin >> choice;
+
+        switch (choice) {
+        case 1: {
+            std::cout << "\n View Products \n";
+            for (const auto& product : products) {
+                std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << ", Price: $" << product->getPrice();
+
+
+                if (auto* electronics = dynamic_cast<Electronics*>(product)) {
+                    std::cout << ", Brand: " << electronics->getBrand() << ", Model: " << electronics->getModel();
+                }
+                else if (auto* book = dynamic_cast<Books*>(product)) {
+                    std::cout << ", Author: " << book->getAuthor() << ", Genre: " << book->getGenre() << ", ISBN: " << book->getISBN();
+                }
+                else if (auto* clothing = dynamic_cast<Clothing*>(product)) {
+                    std::cout << ", Size: " << clothing->getSize() << ", Color: " << clothing->getColor() << ", Material: " << clothing->getMaterial();
+                }
+
+                std::cout << std::endl;
+            }
+        }
+              break;
+        case 2:
+        {
+            currentOrder.orderProductsByID(products);
+        }
+        break;
+        case 3:
+        {
+            std::cout << "\n View Order \n";
+            currentOrder.checkOrder();
+        }
+        break;
+        case 4:
+        {
+            std::cout << "\n Checkout \n";
+            currentOrder.approveOrder();
+
+        }
+        break;
+        case 5: {
+            std::cout << "\n View Product Catalog \n";
+            catalog.viewAllProducts();
+        }
+              break;
+        case 6: {
+            std::cout << "\n Update Product Details \n";
+            int updateProductID;
+            double newPrice;
+            int newQuantity;
+
+            std::cout << "Enter Product ID to update: ";
+            std::cin >> updateProductID;
+
+            std::cout << "Enter new price: ";
+            std::cin >> newPrice;
+
+            std::cout << "Enter new quantity: ";
+            std::cin >> newQuantity;
+
+            catalog.updateProductDetails(updateProductID, newPrice, newQuantity);
+            std::cout << "Product details updated.\n";
+        }
+              break;
+        case 7: {
+            std::cout << "\n Remove Product from Catalog \n";
+            int removeProductID;
+            std::cout << "Enter Product ID to remove: ";
+            std::cin >> removeProductID;
+            catalog.removeProduct(removeProductID);
+            std::cout << "Product removed from the catalog.\n";
+        }
+              break;
+        case 8:
+        {
+            std::cout << "\n Restock Product \n";
+            int restockProductId;
+            int quantityRestock;
+            std::cout << "Enter Product ID to restock: ";
+            std::cin >> restockProductId;
+            std::cout << "Enter how much to restock: ";
+            std::cin >> quantityRestock;
+            inventory.manageStock(restockProductId, quantityRestock);
+        }
+        break;
+        case 9:
+        {
+            std::cout << "\n Generate Restocking List \n";
+            auto restockingList = inventory.generateRestockingList();
+            std::cout << "Products needing restocking:\n";
+            for (const auto& product : restockingList) {
+                std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << std::endl;
+            }
+        }
+        break;
+        case 0:
+            std::cout << "Exiting program.\n";
+            break;
+        default:
+            std::cout << "Invalid choice. Please try again.\n";
+            break;
+        }
+
+    } while (choice != 0);
+
+    for (auto& product : products) {
+        delete product;
+    }
 
     return 0;
 }
