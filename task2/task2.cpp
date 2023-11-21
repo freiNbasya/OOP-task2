@@ -127,6 +127,93 @@ private:
     std::string material;
 };
 
+class Order {
+public:
+    Order(std::vector<Product*>& products)
+        : orderID(generateOrderID()), totalCost(0.0), orderStatus("Pending") {
+        inputCustomerInformation();
+    }
+
+    void inputCustomerInformation() {
+        std::cout << "Enter customer name: ";
+        std::cin >> customer;
+    }
+
+    void orderProductsByID(std::vector<Product*>& products) {
+        int productID;
+        char continueOrdering;
+        do {
+            std::cout << "Enter Product ID to add to the order: ";
+            std::cin >> productID;
+
+            Product* selectedProduct = nullptr;
+            for (const auto& product : products) {
+                if (product->getProductID() == productID) {
+                    selectedProduct = product;
+                    break;
+                }
+            }
+
+            if (selectedProduct) {
+                orderedProducts.push_back(selectedProduct);
+                std::cout << "Product added to the order.\n";
+                calculateTotalCost(selectedProduct->getPrice());
+            }
+            else {
+                std::cout << "Product not found.\n";
+            }
+
+            std::cout << "Do you want to continue ordering? (y/n): ";
+            std::cin >> continueOrdering;
+        } while (continueOrdering == 'y' || continueOrdering == 'Y');
+
+    }
+
+    void calculateTotalCost(double price) {
+        totalCost += price;
+
+    }
+
+    void checkOrder() const {
+        std::cout << "\nCustomer: " << customer << "\nOrdered Products:\n";
+        for (const auto& product : orderedProducts) {
+            std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << ", Price: $" << product->getPrice() << std::endl;
+        }
+        std::cout << "Total Cost: $" << totalCost << std::endl;
+    }
+
+    void approveOrder() {
+        std::cout << "Order confirmed. Total cost: $" << totalCost << std::endl;
+
+
+        for (const auto& product : orderedProducts) {
+            int currentQuantity = product->getQuantityInStock();
+            product->setQuantityInStock(currentQuantity - 1);
+        }
+
+        orderStatus = "Approved";
+        orderedProducts.clear();
+        totalCost = 0.0;
+        orderStatus = "Pending";
+        inputCustomerInformation();
+    }
+
+private:
+    int generateOrderID() {
+        static bool seedInitialized = false;
+        if (!seedInitialized) {
+            std::srand(static_cast<unsigned>(std::time(0)));
+            seedInitialized = true;
+        }
+        return std::rand();
+    }
+    int orderID;
+    std::string customer;
+    std::vector<Product*> orderedProducts;
+    double totalCost;
+    std::string orderStatus;
+};
+
 class ProductCatalog {
 private:
     std::vector<Product*>& products;
