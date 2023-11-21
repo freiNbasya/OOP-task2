@@ -127,6 +127,57 @@ private:
     std::string material;
 };
 
+class ProductCatalog {
+private:
+    std::vector<Product*>& products;
+
+public:
+    ProductCatalog(std::vector<Product*>& products)
+        : products(products) {}
+
+    void addProduct(Product* product) {
+        products.push_back(product);
+    }
+
+
+    void updateProductDetails(int productID, double newPrice, int newQuantity) {
+        for (auto& product : products) {
+            if (product->getProductID() == productID) {
+                product->setPrice(newPrice);
+                product->setQuantityInStock(newQuantity);
+                break;
+            }
+        }
+    }
+
+
+    void removeProduct(int productID) {
+        products.erase(std::remove_if(products.begin(), products.end(), [productID](Product* p) { return p->getProductID() == productID; }),
+            products.end());
+    }
+
+
+    void viewAllProducts() const {
+        std::cout << "\n View Product Catalog \n";
+        for (const auto& product : products) {
+            std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << ", Price: $" << product->getPrice() << ", Quantity in Stock: " << product->getQuantityInStock();
+
+            if (auto* electronics = dynamic_cast<Electronics*>(product)) {
+                std::cout << ", Brand: " << electronics->getBrand() << ", Model: " << electronics->getModel() << ", Power consumption: " << electronics->getPowerConsumption() << "W";
+
+            }
+            else if (auto* book = dynamic_cast<Books*>(product)) {
+                std::cout << ", Author: " << book->getAuthor() << ", Genre: " << book->getGenre() << ", ISBN: " << book->getISBN();
+            }
+            else if (auto* clothing = dynamic_cast<Clothing*>(product)) {
+                std::cout << ", Size: " << clothing->getSize() << ", Color: " << clothing->getColor() << ", Material: " << clothing->getMaterial();
+            }
+
+            std::cout << std::endl;
+        }
+    }
+};
+
 class ConfigReader {
 public:
 
