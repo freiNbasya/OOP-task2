@@ -6,6 +6,7 @@
 #include <cstdlib>  
 #include <ctime> 
 #include "product.h"
+#include "generator.h"
 
 
 class Electronics : public Product {
@@ -13,7 +14,7 @@ public:
 
     Electronics(int id, const std::string& n, double p, int quantity,
         const std::string& b, const std::string& m, double power)
-        : Product(n, p, quantity), brand(b), model(m), powerConsumption(power) {}
+        : Product(n, p, quantity), brand(move(b)), model(move(m)), powerConsumption(power) {}
 
 
     const std::string& getBrand() const { return brand; }
@@ -25,7 +26,10 @@ public:
     double getPowerConsumption() const { return powerConsumption; }
     void setPowerConsumption(double power) { powerConsumption = power; }
 
-
+    void displayInfo() const override {
+        Product::displayInfo();  
+        std::cout << "Brand: " << brand << ", Model: " << model << ", Power Consumption: " << powerConsumption << " Watts" << std::endl;
+    }
     void displayPowerConsumption() const {
         std::cout << "Power Consumption: " << powerConsumption << " Watts" << std::endl;
     }
@@ -40,7 +44,7 @@ public:
 
     Books(int id, const std::string& n, double p, int quantity,
         const std::string& a, const std::string& g, const std::string& isbn)
-        : Product(n, p, quantity), author(a), genre(g), ISBN(isbn) {}
+        : Product(n, p, quantity), author(move(a)), genre(move(g)), ISBN(move(isbn)) {}
 
 
     const std::string& getAuthor() const { return author; }
@@ -51,7 +55,10 @@ public:
 
     const std::string& getISBN() const { return ISBN; }
     void setISBN(const std::string& isbn) { ISBN = isbn; }
-
+    void displayInfo() const override {
+        Product::displayInfo(); 
+        std::cout << "Author: " << author << ", Genre: " << genre << ", ISBN: " << ISBN << std::endl;
+    }
 
     void displayAuthor() const {
         std::cout << "Author: " << author << std::endl;
@@ -68,7 +75,7 @@ public:
 
     Clothing(int id, const std::string& n, double p, int quantity,
         const std::string& s, const std::string& c, const std::string& m)
-        : Product(n, p, quantity), size(s), color(c), material(m) {}
+        : Product(n, p, quantity), size(move(s)), color(move(c)), material(move(m)) {}
 
 
     const std::string& getSize() const { return size; }
@@ -80,6 +87,10 @@ public:
     const std::string& getMaterial() const { return material; }
     void setMaterial(const std::string& m) { material = m; }
 
+    void displayInfo() const override {
+        Product::displayInfo(); 
+        std::cout << "Size: " << size << ", Color: " << color << ", Material: " << material << std::endl;
+    }
 
     void displaySize() const {
         std::cout << "Size: " << size << std::endl;
@@ -93,7 +104,7 @@ private:
 class Order {
 public:
     Order(std::vector<Product*>& products)
-        : orderID(generateOrderID()), totalCost(0.0), orderStatus("Pending") {
+        : orderID(Generator::generateID()), totalCost(0.0), orderStatus("Pending") {
         inputCustomerInformation();
     }
 
@@ -140,7 +151,7 @@ public:
     void checkOrder() const {
         std::cout << "\nCustomer: " << customer << "\nOrdered Products:\n";
         for (const auto& product : orderedProducts) {
-            std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << ", Price: $" << product->getPrice() << std::endl;
+            
         }
         std::cout << "Total Cost: $" << totalCost << std::endl;
     }
@@ -162,14 +173,6 @@ public:
     }
 
 private:
-    int generateOrderID() {
-        static bool seedInitialized = false;
-        if (!seedInitialized) {
-            std::srand(static_cast<unsigned>(std::time(0)));
-            seedInitialized = true;
-        }
-        return std::rand();
-    }
     int orderID;
     std::string customer;
     std::vector<Product*> orderedProducts;
@@ -202,27 +205,13 @@ public:
 
 
     void removeProduct(int productID) {
-        products.erase(std::remove_if(products.begin(), products.end(), [productID](Product* p) { return p->getProductID() == productID; }),
-            products.end());
+        products.erase(std::remove_if(products.begin(), products.end(), [productID](Product* p) { return p->getProductID() == productID; }), products.end());
     }
 
 
     void viewAllProducts() const {
-        std::cout << "\n View Product Catalog \n";
         for (const auto& product : products) {
-            std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << ", Price: $" << product->getPrice() << ", Quantity in Stock: " << product->getQuantityInStock();
-
-            if (auto* electronics = dynamic_cast<Electronics*>(product)) {
-                std::cout << ", Brand: " << electronics->getBrand() << ", Model: " << electronics->getModel() << ", Power consumption: " << electronics->getPowerConsumption() << "W";
-
-            }
-            else if (auto* book = dynamic_cast<Books*>(product)) {
-                std::cout << ", Author: " << book->getAuthor() << ", Genre: " << book->getGenre() << ", ISBN: " << book->getISBN();
-            }
-            else if (auto* clothing = dynamic_cast<Clothing*>(product)) {
-                std::cout << ", Size: " << clothing->getSize() << ", Color: " << clothing->getColor() << ", Material: " << clothing->getMaterial();
-            }
-
+            product->displayInfo();
             std::cout << std::endl;
         }
     }
@@ -249,13 +238,6 @@ public:
     }
 
 
-    void notifyLowStock() const {
-        for (const auto& product : products) {
-            if (product->getQuantityInStock() < lowStockThreshold) {
-                std::cout << "Low stock for product: " << product->getName() << std::endl;
-            }
-        }
-    }
 
     std::vector<Product*> generateRestockingList() const {
         std::vector<Product*> restockingList;
@@ -290,27 +272,27 @@ public:
 
 
 
-            std::string productType = tokens[0];
-            std::string productName = tokens[1];
+            std::string& productType = tokens[0];
+            std::string& productName = tokens[1];
             double price = std::stod(tokens[2]);
             int quantity = std::stoi(tokens[3]);
 
             if (productType == "Electronics") {
-                std::string brand = tokens[4];
-                std::string model = tokens[5];
+                std::string& brand = tokens[4];
+                std::string& model = tokens[5];
                 double powerConsumption = std::stod(tokens[6]);
                 products.push_back(new Electronics(0, productName, price, quantity, brand, model, powerConsumption));
             }
             else if (productType == "Books") {
-                std::string author = tokens[4];
-                std::string genre = tokens[5];
-                std::string ISBN = tokens[6];
+                std::string& author = tokens[4];
+                std::string& genre = tokens[5];
+                std::string& ISBN = tokens[6];
                 products.push_back(new Books(0, productName, price, quantity, author, genre, ISBN));
             }
             else if (productType == "Clothing") {
-                std::string size = tokens[4];
-                std::string color = tokens[5];
-                std::string material = tokens[6];
+                std::string& size = tokens[4];
+                std::string& color = tokens[5];
+                std::string& material = tokens[6];
                 products.push_back(new Clothing(0, productName, price, quantity, size, color, material));
             }
             else {

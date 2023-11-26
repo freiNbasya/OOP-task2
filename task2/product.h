@@ -1,9 +1,9 @@
-#ifndef PRODUCT_H
-#define PRODUCT_H
 
+#pragma once
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 
 class Product {
 public:
@@ -21,15 +21,14 @@ public:
     int getQuantityInStock() const;
     void setQuantityInStock(int quantity);
 
+    virtual void displayInfo() const;
+
     double calculateTotalCost() const;
     virtual ~Product();
 
 private:
     int productID;
-    int generateRandomID();
     std::string name;
     double price;
     int quantityInStock;
 };
-
-#endif 

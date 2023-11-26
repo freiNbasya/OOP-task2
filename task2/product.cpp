@@ -1,8 +1,9 @@
 #include "product.h"
+#include "generator.h"
 
 
 Product::Product(const std::string& n, double p, int quantity)
-        : productID(generateRandomID()), name(n), price(p), quantityInStock(quantity) {}
+        : productID(Generator::generateID()), name(move(n)), price(p), quantityInStock(quantity) {}
 
 
     int Product::getProductID() const { return productID; }
@@ -17,18 +18,13 @@ Product::Product(const std::string& n, double p, int quantity)
     int Product::getQuantityInStock() const { return quantityInStock; }
     void Product::setQuantityInStock(int quantity) { quantityInStock = quantity; }
 
+    void Product::displayInfo() const{
+        std::cout << "Product ID: " << getProductID() << ", Name: " << getName() << ", Price: $" << getPrice() << std::endl;
+    }
+
     double Product::calculateTotalCost() const {
         return price * quantityInStock;
     }
     Product::~Product() {}
 
 
-
-    int Product::generateRandomID() {
-        static bool seedInitialized = false;
-        if (!seedInitialized) {
-            std::srand(std::time(0));
-            seedInitialized = true;
-        }
-        return std::rand();
-    }
