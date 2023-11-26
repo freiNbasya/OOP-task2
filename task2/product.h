@@ -21,7 +21,7 @@ public:
     int getQuantityInStock() const;
     void setQuantityInStock(int quantity);
 
-    virtual void displayInfo() const;
+    virtual void displayInfo() const = 0;
 
     double calculateTotalCost() const;
     virtual ~Product();

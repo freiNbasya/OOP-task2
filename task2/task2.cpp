@@ -27,8 +27,8 @@ public:
     void setPowerConsumption(double power) { powerConsumption = power; }
 
     void displayInfo() const override {
-        Product::displayInfo();  
-        std::cout << "Brand: " << brand << ", Model: " << model << ", Power Consumption: " << powerConsumption << " Watts" << std::endl;
+        std::cout << "Product ID: " << getProductID() << ", Name: " << getName() << ", Quantity: " << getQuantityInStock() << ", Price: $" << getPrice();
+        std::cout << ", Brand: " << getBrand() << ", Model: " << getModel() << ", Power Consumption: " << getPowerConsumption()  << " Watts" << std::endl;
     }
     void displayPowerConsumption() const {
         std::cout << "Power Consumption: " << powerConsumption << " Watts" << std::endl;
@@ -55,8 +55,9 @@ public:
 
     const std::string& getISBN() const { return ISBN; }
     void setISBN(const std::string& isbn) { ISBN = isbn; }
+    
     void displayInfo() const override {
-        Product::displayInfo(); 
+        std::cout << "Product ID: " << getProductID() << ", Name: " << getName() << ", Quantity: " << getQuantityInStock() << ", Price: $" << getPrice();
         std::cout << "Author: " << author << ", Genre: " << genre << ", ISBN: " << ISBN << std::endl;
     }
 
@@ -88,7 +89,7 @@ public:
     void setMaterial(const std::string& m) { material = m; }
 
     void displayInfo() const override {
-        Product::displayInfo(); 
+        std::cout << "Product ID: " << getProductID() << ", Name: " << getName() << ", Quantity: " << getQuantityInStock() << ", Price: $" << getPrice();
         std::cout << "Size: " << size << ", Color: " << color << ", Material: " << material << std::endl;
     }
 
@@ -198,6 +199,7 @@ public:
             if (product->getProductID() == productID) {
                 product->setPrice(newPrice);
                 product->setQuantityInStock(newQuantity);
+                
                 break;
             }
         }
@@ -211,7 +213,15 @@ public:
 
     void viewAllProducts() const {
         for (const auto& product : products) {
-            product->displayInfo();
+            if (auto* electronics = dynamic_cast<Electronics*>(product)) {
+                electronics->displayInfo();
+            }
+            else if (auto* book = dynamic_cast<Books*>(product)) {
+                book->displayInfo();
+            }
+            else if (auto* clothing = dynamic_cast<Clothing*>(product)) {
+                clothing->displayInfo();
+            }
             std::cout << std::endl;
         }
     }
@@ -343,23 +353,8 @@ int main() {
 
         switch (choice) {
         case 1: {
-            std::cout << "\n View Products \n";
-            for (const auto& product : products) {
-                std::cout << "Product ID: " << product->getProductID() << ", Name: " << product->getName() << ", Price: $" << product->getPrice();
-
-
-                if (auto* electronics = dynamic_cast<Electronics*>(product)) {
-                    std::cout << ", Brand: " << electronics->getBrand() << ", Model: " << electronics->getModel();
-                }
-                else if (auto* book = dynamic_cast<Books*>(product)) {
-                    std::cout << ", Author: " << book->getAuthor() << ", Genre: " << book->getGenre() << ", ISBN: " << book->getISBN();
-                }
-                else if (auto* clothing = dynamic_cast<Clothing*>(product)) {
-                    std::cout << ", Size: " << clothing->getSize() << ", Color: " << clothing->getColor() << ", Material: " << clothing->getMaterial();
-                }
-
-                std::cout << std::endl;
-            }
+            std::cout << "\n View Product Catalog \n";
+            catalog.viewAllProducts();
         }
               break;
         case 2:

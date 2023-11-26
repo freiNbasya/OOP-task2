@@ -18,10 +18,6 @@ Product::Product(const std::string& n, double p, int quantity)
     int Product::getQuantityInStock() const { return quantityInStock; }
     void Product::setQuantityInStock(int quantity) { quantityInStock = quantity; }
 
-    void Product::displayInfo() const{
-        std::cout << "Product ID: " << getProductID() << ", Name: " << getName() << ", Price: $" << getPrice() << std::endl;
-    }
-
     double Product::calculateTotalCost() const {
         return price * quantityInStock;
     }
